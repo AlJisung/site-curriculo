@@ -1,40 +1,35 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #121212;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-}
-.container {
-  max-width: 800px;
-  margin: auto;
+  background-color: #111;
+  color: #fdd835;
   padding: 20px;
 }
-.profile img {
-  width: 150px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #ffc107;
-}
-h1, h2 {
-  color: #ffc107;
-}
-input, textarea, button {
+input, textarea {
+  display: block;
   width: 100%;
+  margin-bottom: 15px;
   padding: 10px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-}
-button {
-  background-color: #ffc107;
-  color: #000;
-  cursor: pointer;
+  background: #222;
+  border: 1px solid #fdd835;
+  color: #fff;
 }
 #upload-area {
-  border: 2px dashed #ffc107;
+  border: 2px dashed #fdd835;
   padding: 20px;
-  text-align: center;
   cursor: pointer;
-  margin-bottom: 10px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+img {
+  max-width: 150px;
+  margin-bottom: 15px;
+  display: none;
+}
+button {
+  background-color: #fdd835;
+  border: none;
+  padding: 10px 20px;
+  color: #111;
+  cursor: pointer;
+  font-weight: bold;
 }

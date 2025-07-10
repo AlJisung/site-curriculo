@@ -1,4 +1,7 @@
-// Configuração do Firebase (SDK compatível v9)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyAMXmD-wJ4Whsk2z-ZCAikWIkbwZniuFic",
   authDomain: "curriculo-cliente.firebaseapp.com",
@@ -9,108 +12,72 @@ const firebaseConfig = {
   measurementId: "G-392WTD2ER1"
 };
 
-// Inicialização do Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storage = firebase.storage();
-const docRef = db.collection("curriculos").doc("curriculos1");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const docRef = doc(db, "curriculos", "curriculos1");
 
-const campos = ["nome", "email", "telefone", "historico", "artigos"];
-const indexFoto = document.getElementById("fotoURL");
+export async function salvar() {
+  const dados = {
+    nome: document.getElementById("nome").value,
+    email: document.getElementById("email").value,
+    telefone: document.getElementById("telefone").value,
+    historico: document.getElementById("historico").value,
+    artigos: document.getElementById("artigos").value
+  };
+  await updateDoc(docRef, dados);
+  alert("Dados salvos!");
+}
 
-if (document.getElementById("curriculoForm")) {
-  // Página de edição
-  const form = document.getElementById("curriculoForm");
-  const uploadArea = document.getElementById("upload-area");
-  const fotoInput = document.getElementById("fotoInput");
-  const fotoPreview = document.getElementById("fotoPreview");
-  let fotoURL = "";
-
-  // Eventos de clique e arrastar
-  uploadArea.addEventListener("click", () => fotoInput.click());
-  uploadArea.addEventListener("dragover", e => {
-    e.preventDefault();
-    uploadArea.style.borderColor = "#fff";
-  });
-  uploadArea.addEventListener("dragleave", () => {
-    uploadArea.style.borderColor = "#FFC107";
-  });
-  uploadArea.addEventListener("drop", e => {
-    e.preventDefault();
-    fotoInput.files = e.dataTransfer.files;
-    uploadFile(fotoInput.files[0]);
-  });
-  fotoInput.addEventListener("change", () => {
-    if (fotoInput.files.length > 0) {
-      uploadFile(fotoInput.files[0]);
+document.addEventListener("DOMContentLoaded", async () => {
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const data = snap.data();
+    if (document.getElementById("nome").tagName === "INPUT") {
+      document.getElementById("nome").value = data.nome || "";
+      document.getElementById("email").value = data.email || "";
+      document.getElementById("telefone").value = data.telefone || "";
+      document.getElementById("historico").value = data.historico || "";
+      document.getElementById("artigos").value = data.artigos || "";
+      if (data.fotoURL) {
+        const preview = document.getElementById("fotoPreview");
+        preview.src = data.fotoURL;
+        preview.style.display = "block";
+      }
+    } else {
+      document.getElementById("nome").textContent = data.nome || "";
+      document.getElementById("email").textContent = data.email || "";
+      document.getElementById("telefone").textContent = data.telefone || "";
+      document.getElementById("historico").textContent = data.historico || "";
+      document.getElementById("artigos").textContent = data.artigos || "";
+      if (data.fotoURL) {
+        document.getElementById("fotoExibida").src = data.fotoURL;
+      }
     }
-  });
-
-  function uploadFile(file) {
-    const ref = storage.ref("fotos/" + Date.now() + "_" + file.name);
-    ref.put(file).then(snapshot => {
-      snapshot.ref.getDownloadURL().then(url => {
-        fotoURL = url;
-        if (fotoPreview) {
-          fotoPreview.src = fotoURL;
-          fotoPreview.style.display = "block";
-        }
-        alert("Foto enviada com sucesso!");
-      }).catch(err => {
-        alert("Erro ao obter URL da foto: " + err.message);
-      });
-    }).catch(err => {
-      alert("Erro ao enviar a foto: " + err.message);
-    });
   }
+});
 
-  // Submeter formulário
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const data = {};
-    campos.forEach(campo => {
-      data[campo] = document.getElementById(campo).value;
-    });
-    if (fotoURL) {
-      data.fotoURL = fotoURL;
-    }
-    docRef.set(data).then(() => {
-      alert("Currículo salvo com sucesso!");
-    }).catch(err => {
-      alert("Erro ao salvar dados: " + err.message);
-    });
-  });
+const uploadArea = document.getElementById("upload-area");
+const fotoInput = document.getElementById("fotoInput");
+const fotoPreview = document.getElementById("fotoPreview");
 
-  // Carregar dados existentes
-  docRef.get().then(doc => {
-    if (doc.exists) {
-      const data = doc.data();
-      campos.forEach(campo => {
-        if (data[campo]) {
-          document.getElementById(campo).value = data[campo];
-        }
-      });
-      if (data.fotoURL && fotoPreview) {
-        fotoPreview.src = data.fotoURL;
-        fotoPreview.style.display = "block";
-      }
-      fotoURL = data.fotoURL || "";
-    }
-  });
-} else {
-  // Página pública
-  docRef.get().then(doc => {
-    if (doc.exists) {
-      const data = doc.data();
-      campos.forEach(campo => {
-        if (data[campo]) {
-          const el = document.getElementById(campo);
-          if (el) el.textContent = data[campo];
-        }
-      });
-      if (data.fotoURL && indexFoto) {
-        indexFoto.src = data.fotoURL;
-      }
-    }
+if (uploadArea) {
+  uploadArea.addEventListener("click", () => fotoInput.click());
+
+  fotoInput.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      fotoPreview.src = reader.result;
+      fotoPreview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+
+    const storageRef = ref(storage, "fotos/" + file.name);
+    await uploadBytes(storageRef, file);
+    const fotoURL = await getDownloadURL(storageRef);
+    await updateDoc(docRef, { fotoURL });
   });
 }

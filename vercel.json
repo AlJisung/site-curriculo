@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
-    { "source": "/edita", "destination": "/edita.html" },
-    { "source": "/edita.html", "destination": "/edita.html" }
+    { "source": "/editar", "destination": "/editar.html" },
+    { "source": "/editar.html", "destination": "/editar.html" }
   ]
 }

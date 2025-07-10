@@ -23,6 +23,8 @@ input, textarea {
 img {
   max-width: 150px;
   margin-bottom: 15px;
+}
+#fotoPreview {
   display: none;
 }
 button {

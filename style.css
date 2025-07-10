@@ -1,0 +1,40 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+.profile img {
+  width: 150px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffc107;
+}
+h1, h2 {
+  color: #ffc107;
+}
+input, textarea, button {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+button {
+  background-color: #ffc107;
+  color: #000;
+  cursor: pointer;
+}
+#upload-area {
+  border: 2px dashed #ffc107;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+}

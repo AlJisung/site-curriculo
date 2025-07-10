@@ -1,3 +1,4 @@
+// Configuração do Firebase (SDK compatível v9)
 const firebaseConfig = {
   apiKey: "AIzaSyAMXmD-wJ4Whsk2z-ZCAikWIkbwZniuFic",
   authDomain: "curriculo-cliente.firebaseapp.com",
@@ -8,21 +9,24 @@ const firebaseConfig = {
   measurementId: "G-392WTD2ER1"
 };
 
+// Inicialização do Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 const docRef = db.collection("curriculos").doc("curriculos1");
 
-const indexFoto = document.getElementById("foto");
 const campos = ["nome", "email", "telefone", "historico", "artigos"];
+const indexFoto = document.getElementById("fotoURL");
 
 if (document.getElementById("curriculoForm")) {
+  // Página de edição
   const form = document.getElementById("curriculoForm");
   const uploadArea = document.getElementById("upload-area");
   const fotoInput = document.getElementById("fotoInput");
   const fotoPreview = document.getElementById("fotoPreview");
   let fotoURL = "";
 
+  // Eventos de clique e arrastar
   uploadArea.addEventListener("click", () => fotoInput.click());
   uploadArea.addEventListener("dragover", e => {
     e.preventDefault();
@@ -60,36 +64,53 @@ if (document.getElementById("curriculoForm")) {
     });
   }
 
+  // Submeter formulário
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = {};
     campos.forEach(campo => {
       data[campo] = document.getElementById(campo).value;
     });
-    if (fotoURL) data.fotoURL = fotoURL;
-    docRef.set(data).then(() => alert("Currículo salvo com sucesso!"));
+    if (fotoURL) {
+      data.fotoURL = fotoURL;
+    }
+    docRef.set(data).then(() => {
+      alert("Currículo salvo com sucesso!");
+    }).catch(err => {
+      alert("Erro ao salvar dados: " + err.message);
+    });
   });
 
+  // Carregar dados existentes
   docRef.get().then(doc => {
     if (doc.exists) {
       const data = doc.data();
       campos.forEach(campo => {
-        if (data[campo]) document.getElementById(campo).value = data[campo];
+        if (data[campo]) {
+          document.getElementById(campo).value = data[campo];
+        }
       });
       if (data.fotoURL && fotoPreview) {
         fotoPreview.src = data.fotoURL;
         fotoPreview.style.display = "block";
       }
+      fotoURL = data.fotoURL || "";
     }
   });
 } else {
+  // Página pública
   docRef.get().then(doc => {
     if (doc.exists) {
       const data = doc.data();
       campos.forEach(campo => {
-        if (data[campo]) document.getElementById(campo).textContent = data[campo];
+        if (data[campo]) {
+          const el = document.getElementById(campo);
+          if (el) el.textContent = data[campo];
+        }
       });
-      if (data.fotoURL && indexFoto) indexFoto.src = data.fotoURL;
+      if (data.fotoURL && indexFoto) {
+        indexFoto.src = data.fotoURL;
+      }
     }
   });
 }

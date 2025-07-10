@@ -25,37 +25,47 @@ export async function salvar() {
     historico: document.getElementById("historico").value,
     artigos: document.getElementById("artigos").value
   };
-  await updateDoc(docRef, dados);
-  alert("Dados salvos!");
+  try {
+    await updateDoc(docRef, dados);
+    alert("Dados salvos!");
+  } catch (error) {
+    alert("Erro ao salvar dados: " + error.message);
+    console.error(error);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const snap = await getDoc(docRef);
-  if (snap.exists()) {
-    const data = snap.data();
-    if (document.getElementById("nome").tagName === "INPUT") {
-      // Página de edição
-      document.getElementById("nome").value = data.nome || "";
-      document.getElementById("email").value = data.email || "";
-      document.getElementById("telefone").value = data.telefone || "";
-      document.getElementById("historico").value = data.historico || "";
-      document.getElementById("artigos").value = data.artigos || "";
-      if (data.fotoURL) {
-        const preview = document.getElementById("fotoPreview");
-        preview.src = data.fotoURL;
-        preview.style.display = "block";
-      }
-    } else {
-      // Página pública
-      document.getElementById("nome").textContent = data.nome || "";
-      document.getElementById("email").textContent = data.email || "";
-      document.getElementById("telefone").textContent = data.telefone || "";
-      document.getElementById("historico").textContent = data.historico || "";
-      document.getElementById("artigos").textContent = data.artigos || "";
-      if (data.fotoURL) {
-        document.getElementById("fotoExibida").src = data.fotoURL;
+  try {
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      if (document.getElementById("nome").tagName === "INPUT") {
+        // Página de edição
+        document.getElementById("nome").value = data.nome || "";
+        document.getElementById("email").value = data.email || "";
+        document.getElementById("telefone").value = data.telefone || "";
+        document.getElementById("historico").value = data.historico || "";
+        document.getElementById("artigos").value = data.artigos || "";
+        if (data.fotoURL) {
+          const preview = document.getElementById("fotoPreview");
+          preview.src = data.fotoURL;
+          preview.style.display = "block";
+        }
+      } else {
+        // Página pública
+        document.getElementById("nome").textContent = data.nome || "";
+        document.getElementById("email").textContent = data.email || "";
+        document.getElementById("telefone").textContent = data.telefone || "";
+        document.getElementById("historico").textContent = data.historico || "";
+        document.getElementById("artigos").textContent = data.artigos || "";
+        if (data.fotoURL) {
+          document.getElementById("fotoExibida").src = data.fotoURL;
+        }
       }
     }
+  } catch (error) {
+    alert("Erro ao carregar dados: " + error.message);
+    console.error(error);
   }
 });
 
@@ -68,7 +78,10 @@ if (uploadArea) {
 
   fotoInput.addEventListener("change", async (event) => {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+      alert("Nenhum arquivo selecionado.");
+      return;
+    }
 
     // Exibe preview da imagem local
     const reader = new FileReader();
@@ -79,20 +92,19 @@ if (uploadArea) {
     reader.readAsDataURL(file);
 
     try {
-      // Upload para Storage
+      console.log("Iniciando upload da foto...");
       const storageRef = ref(storage, "fotos/" + file.name);
       await uploadBytes(storageRef, file);
+      console.log("Upload concluído.");
 
-      // Pega URL pública da imagem
       const fotoURL = await getDownloadURL(storageRef);
+      console.log("URL da foto obtida:", fotoURL);
 
-      // Atualiza Firestore com a URL da foto
       await updateDoc(docRef, { fotoURL });
-
       alert("Foto enviada e URL salva com sucesso!");
     } catch (error) {
       alert("Erro ao enviar foto: " + error.message);
-      console.error(error);
+      console.error("Erro no upload/salvamento:", error);
     }
   });
 }

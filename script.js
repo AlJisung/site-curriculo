@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (snap.exists()) {
     const data = snap.data();
     if (document.getElementById("nome").tagName === "INPUT") {
+      // Página de edição
       document.getElementById("nome").value = data.nome || "";
       document.getElementById("email").value = data.email || "";
       document.getElementById("telefone").value = data.telefone || "";
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         preview.style.display = "block";
       }
     } else {
+      // Página pública
       document.getElementById("nome").textContent = data.nome || "";
       document.getElementById("email").textContent = data.email || "";
       document.getElementById("telefone").textContent = data.telefone || "";
@@ -68,6 +70,7 @@ if (uploadArea) {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Exibe preview da imagem local
     const reader = new FileReader();
     reader.onload = () => {
       fotoPreview.src = reader.result;
@@ -75,9 +78,21 @@ if (uploadArea) {
     };
     reader.readAsDataURL(file);
 
-    const storageRef = ref(storage, "fotos/" + file.name);
-    await uploadBytes(storageRef, file);
-    const fotoURL = await getDownloadURL(storageRef);
-    await updateDoc(docRef, { fotoURL });
+    try {
+      // Upload para Storage
+      const storageRef = ref(storage, "fotos/" + file.name);
+      await uploadBytes(storageRef, file);
+
+      // Pega URL pública da imagem
+      const fotoURL = await getDownloadURL(storageRef);
+
+      // Atualiza Firestore com a URL da foto
+      await updateDoc(docRef, { fotoURL });
+
+      alert("Foto enviada e URL salva com sucesso!");
+    } catch (error) {
+      alert("Erro ao enviar foto: " + error.message);
+      console.error(error);
+    }
   });
 }

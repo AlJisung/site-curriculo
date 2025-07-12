@@ -2,24 +2,49 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Currículo</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Currículo Público</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
+<body style="background-color: #000; color: #FFD700; font-family: sans-serif; padding: 20px;">
   <h1>Currículo</h1>
-
-  <!-- Foto pública visível -->
-  <img id="fotoExibida" />
 
   <p><strong>Nome:</strong> <span id="nome"></span></p>
   <p><strong>Email:</strong> <span id="email"></span></p>
   <p><strong>Telefone:</strong> <span id="telefone"></span></p>
-  <p><strong>Histórico Acadêmico:</strong></p>
-  <p id="historico"></p>
-  <p><strong>Artigos Publicados:</strong></p>
-  <p id="artigos"></p>
+  <p><strong>Histórico Acadêmico:</strong><br /><span id="historico"></span></p>
+  <p><strong>Artigos Publicados:</strong><br /><span id="artigos"></span></p>
+  <img id="foto" style="max-width: 200px; margin-top: 10px;" />
 
-  <script type="module" src="script.js"></script>
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAMXmD-wJ4Whsk2z-ZCAikWIkbwZniuFic",
+      authDomain: "curriculo-cliente.firebaseapp.com",
+      projectId: "curriculo-cliente",
+      storageBucket: "curriculo-cliente.firebasestorage.app",
+      messagingSenderId: "404580295206",
+      appId: "1:404580295206:web:b57292cd726a55842b7ce7",
+      measurementId: "G-392WTD2ER1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function carregarCurriculo() {
+      const doc = await db.collection("curriculos").doc("curriculo1").get();
+      const dados = doc.data();
+
+      document.getElementById("nome").textContent = dados.nome;
+      document.getElementById("email").textContent = dados.email;
+      document.getElementById("telefone").textContent = dados.telefone;
+      document.getElementById("historico").textContent = dados.historico;
+      document.getElementById("artigos").textContent = dados.artigos;
+      document.getElementById("foto").src = dados.fotoURL;
+    }
+
+    carregarCurriculo();
+  </script>
 </body>
 </html>
